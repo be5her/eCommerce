@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { history } from "../..";
 
 const sleep = () =>
-    new Promise((resolve) => setTimeout(resolve, 300));
+    new Promise((resolve) => setTimeout(resolve, 200));
 
 axios.defaults.baseURL = "http://localhost:5000/api/";
 axios.defaults.withCredentials = true;
@@ -26,7 +26,6 @@ axios.interceptors.response.use(
     (error: AxiosError<ErrorData>) => {
         if (error.isAxiosError && error.response) {
             const { data, status } = error.response;
-            console.log(error.response.data);
             switch (status) {
                 case 400:
                     if (data.errors) {
