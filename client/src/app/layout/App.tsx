@@ -4,7 +4,7 @@ import {
     createTheme,
     ThemeProvider,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,29 +18,37 @@ import AboutPage from "../../features/about/AboutPage";
 import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
-import { getCookie } from "../util/util";
-import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
 import { useAppDispatch } from "../store/configureStore";
-import { setBasket } from "../../features/basket/basketSlice";
+import { fetchBasketAsync } from "../../features/basket/basketSlice";
+import Register from "../../features/account/Register";
+import Login from "../../features/account/Login";
+import { fetchCurrentUser } from "../../features/account/accountSlice";
+import RequireAuth from "./RequireAuth";
 
 function App() {
     // const { setBasket } = useStoreContext();
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(true);
+    const requestUser = useRef(false);
 
-    useEffect(() => {
-        const buyerId = getCookie("buyerId");
-        if (buyerId) {
-            agent.Basket.get()
-                .then((basket) => dispatch(setBasket(basket)))
-                .catch((error) => console.log(error))
-                .finally(() => setLoading(false));
-        } else {
-            setLoading(false);
+    const initApp = useCallback(async () => {
+        try {
+            if (!requestUser.current) {
+                await dispatch(fetchCurrentUser());
+                //@ts-ignore
+                requestUser.current = true;
+            }
+            await dispatch(fetchBasketAsync());
+        } catch (error) {
+            console.log(error);
         }
     }, [dispatch]);
+
+    useEffect(() => {
+        initApp().then(() => setLoading(false));
+    }, [initApp]);
 
     const [darkMode, setDarkMode] = useState(true);
     const paletteType = darkMode ? "dark" : "light";
@@ -87,9 +95,15 @@ function App() {
                         element={<ContactPage />}
                     />
                     <Route path="/basket" element={<BasketPage />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/login" element={<Login />} />
                     <Route
                         path="/checkout"
-                        element={<CheckoutPage />}
+                        element={
+                            <RequireAuth>
+                                <CheckoutPage />
+                            </RequireAuth>
+                        }
                     />
                     <Route
                         path="/server-error"
