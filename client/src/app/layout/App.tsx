@@ -82,9 +82,12 @@ function App() {
                 darkMode={darkMode}
                 handleThemeChange={handleThemeChange}
             />
-            <Container>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+            </Routes>
+            <Container sx={{ mt: 4, mb: 2 }}>
                 <Routes>
-                    <Route path="/" element={<HomePage />} />
+                    <Route path="/" />
                     <Route path="/catalog" element={<Catalog />} />
                     <Route
                         path="/catalog/:id"
