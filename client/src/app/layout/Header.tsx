@@ -51,7 +51,7 @@ export default function Header({
     const { basket } = useAppSelector((state) => state.basket);
     const { user } = useAppSelector((state) => state.account);
     const itemCount = basket?.items.reduce(
-        (sum, item) => sum + item.quantity,
+        (sum: number, item) => sum + item.quantity,
         0
     );
     return (
@@ -98,6 +98,15 @@ export default function Header({
                                 {title.toUpperCase()}
                             </ListItem>
                         ))}
+                        {user && user.roles?.includes("Admin") && (
+                            <ListItem
+                                component={NavLink}
+                                to={"/inventory"}
+                                sx={navStyles}
+                            >
+                                INVENTORY
+                            </ListItem>
+                        )}
                     </List>
                 </Box>
 
