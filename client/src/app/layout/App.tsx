@@ -27,6 +27,7 @@ import { fetchCurrentUser } from "../../features/account/accountSlice";
 import RequireAuth from "./RequireAuth";
 import Orders from "../../features/orders/Orders";
 import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
+import Inventory from "../../features/admin/Inventory";
 
 function App() {
     // const { setBasket } = useStoreContext();
@@ -112,8 +113,16 @@ function App() {
                     <Route
                         path="/orders"
                         element={
-                            <RequireAuth>
+                            <RequireAuth roles={["admin"]}>
                                 <Orders />
+                            </RequireAuth>
+                        }
+                    />
+                    <Route
+                        path="/inventory"
+                        element={
+                            <RequireAuth roles={["Admin"]}>
+                                <Inventory />
                             </RequireAuth>
                         }
                     />
