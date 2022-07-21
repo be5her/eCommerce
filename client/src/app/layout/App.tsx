@@ -28,6 +28,7 @@ import RequireAuth from "./RequireAuth";
 import Orders from "../../features/orders/Orders";
 import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
 import Inventory from "../../features/admin/Inventory";
+import DemoWarning from "../components/DemoWarning";
 
 function App() {
     // const { setBasket } = useStoreContext();
@@ -79,6 +80,7 @@ function App() {
                 closeOnClick={false}
             />
             <CssBaseline />
+            <DemoWarning />
             <Header
                 darkMode={darkMode}
                 handleThemeChange={handleThemeChange}

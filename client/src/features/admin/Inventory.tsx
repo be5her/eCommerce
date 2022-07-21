@@ -10,11 +10,7 @@ import {
     TableBody,
     Box,
 } from "@mui/material";
-import {
-    Edit,
-    Delete,
-    ContactlessOutlined,
-} from "@mui/icons-material";
+import { Edit, Delete } from "@mui/icons-material";
 import { currencyFormat } from "../../app/util/util";
 import useProducts from "../../app/hooks/useProducts";
 import AppPagination from "../../app/components/AppPagination";
