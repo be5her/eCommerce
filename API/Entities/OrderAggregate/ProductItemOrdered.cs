@@ -1,10 +1,8 @@
-namespace API.Entities.OrderAggregate
+namespace API.Entities.OrderAggregate;
+[Owned]
+public class ProductItemOrdered
 {
-    [Owned]
-    public class ProductItemOrdered
-    {
-        public int ProductId { get; set; }
-        public string Name { get; set; }
-        public string PictureUrl { get; set; }
-    }
+    public int ProductId { get; set; }
+    public string Name { get; set; }
+    public string PictureUrl { get; set; }
 }
