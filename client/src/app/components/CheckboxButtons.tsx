@@ -5,12 +5,14 @@ interface Props {
     items: string[];
     checked?: string[];
     onChange: (item: string[]) => void;
+    isDisabled?: boolean;
 }
 
 export default function CheckboxButtons({
     items,
     checked,
     onChange,
+    isDisabled,
 }: Props) {
     const [checkedItems, setCheckedItems] = useState(checked || []);
 
@@ -36,6 +38,7 @@ export default function CheckboxButtons({
                 <FormControlLabel
                     control={
                         <Checkbox
+                            disabled={isDisabled}
                             checked={
                                 checkedItems.indexOf(item) !== -1
                             }
