@@ -1,4 +1,5 @@
 import { Grid, Paper } from "@mui/material";
+import { useEffect, useState } from "react";
 import AppPagination from "../../app/components/AppPagination";
 import CheckboxButtons from "../../app/components/CheckboxButtons";
 import RadioButtonGroup from "../../app/components/RadioButtonGroup";
@@ -20,12 +21,24 @@ const sortOptions = [
 ];
 
 export default function Catalog() {
-    const { products, brands, types, filtersLoaded, metaData } =
-        useProducts();
+    const {
+        products,
+        brands,
+        types,
+        filtersLoaded,
+        productsLoaded,
+        metaData,
+    } = useProducts();
     const { productParams } = useAppSelector(
         (state) => state.catalog
     );
     const dispatch = useAppDispatch();
+
+    const [filtersDisabled, setFiltersDisabled] = useState(false);
+
+    useEffect(() => {
+        setFiltersDisabled(!productsLoaded);
+    }, [productsLoaded]);
 
     if (!filtersLoaded)
         return <LoadingComponent message="Loading Products" />;
@@ -40,32 +53,36 @@ export default function Catalog() {
                     <RadioButtonGroup
                         selectedValue={productParams.orderBy}
                         options={sortOptions}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                            setFiltersDisabled(true);
                             dispatch(
                                 setProductParams({
                                     orderBy: e.target.value,
                                 })
-                            )
-                        }
+                            );
+                        }}
                     />
                 </Paper>
                 <Paper sx={{ mb: 2, p: 2 }}>
                     <CheckboxButtons
                         items={brands}
                         checked={productParams.brands}
-                        onChange={(items: string[]) =>
+                        isDisabled={filtersDisabled}
+                        onChange={(items: string[]) => {
+                            setFiltersDisabled(true);
                             dispatch(
                                 setProductParams({
                                     brands: items,
                                 })
-                            )
-                        }
+                            );
+                        }}
                     />
                 </Paper>
                 <Paper sx={{ mb: 2, p: 2 }}>
                     <CheckboxButtons
                         items={types}
                         checked={productParams.types}
+                        isDisabled={filtersDisabled}
                         onChange={(items: string[]) =>
                             dispatch(
                                 setProductParams({
@@ -83,6 +100,7 @@ export default function Catalog() {
             <Grid item xs={9} sx={{ mb: 2 }}>
                 {metaData && (
                     <AppPagination
+                        key={metaData.currentPage}
                         metaData={metaData}
                         onPageChange={(page: number) =>
                             dispatch(
