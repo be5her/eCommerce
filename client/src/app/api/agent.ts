@@ -148,6 +148,8 @@ const Account = {
         requests.post("account/register", values),
     currentUser: () => requests.get("account/currentUser"),
     fetchAddress: () => requests.get("account/savedAddress"),
+    verifyEmail: (token: string) =>
+        requests.get(`account/tokenVerifier/${token}`),
 };
 
 const Orders = {

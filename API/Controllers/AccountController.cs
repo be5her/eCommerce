@@ -5,11 +5,22 @@ public class AccountController : BaseApiController
     private readonly UserManager<User> _userManger;
     private readonly TokenService _tokenService;
     private readonly StoreContext _context;
+    private readonly IEmailService _mailService;
+    private readonly IConfiguration _config;
+    private readonly IWebHostEnvironment _hostingEnv;
 
-    public AccountController(UserManager<User> userManger, TokenService tokenService, StoreContext context)
+    public AccountController(UserManager<User> userManger,
+                             TokenService tokenService,
+                             StoreContext context,
+                             IEmailService mailService,
+                             IConfiguration config,
+                             IWebHostEnvironment hostingEnv)
     {
         _tokenService = tokenService;
         _context = context;
+        _mailService = mailService;
+        _config = config;
+        _hostingEnv = hostingEnv;
         _userManger = userManger;
     }
 
@@ -20,6 +31,10 @@ public class AccountController : BaseApiController
         if (user == null || !await _userManger.CheckPasswordAsync(user, loginDto.Password))
         {
             return Unauthorized();
+        }
+        if (!user.EmailConfirmed)
+        {
+            return BadRequest(new ProblemDetails { Title = "Your Email is not confirmed check your email for confirmation link" });
         }
         var userBasket = await RetrieveBasket(loginDto.Username);
         var anonBasket = await RetrieveBasket(Request.Cookies["buyerId"]);
@@ -57,6 +72,8 @@ public class AccountController : BaseApiController
 
         await _userManger.AddToRoleAsync(user, "Member");
 
+        await SendConfirmationEmail(user.Email, user.UserName, user.Id);
+
         return StatusCode(201);
     }
 
@@ -85,6 +102,21 @@ public class AccountController : BaseApiController
                 .FirstOrDefaultAsync();
     }
 
+    [HttpGet("tokenVerifier/{token}")]
+    public async Task<IActionResult> TokenVerifier(string token)
+    {
+        var emailToken = await _context.EmailToken.FindAsync(Guid.Parse(token));
+        if (emailToken == null || emailToken.ExpDate < DateTime.UtcNow)
+        {
+            return BadRequest(new ProblemDetails { Title = "Link is wrong or expired" });
+        }
+        _context.EmailToken.Remove(emailToken);
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == emailToken.UserId);
+        user.EmailConfirmed = true;
+        await _context.SaveChangesAsync();
+        return Ok("Email Confirmed");
+    }
 
     private async Task<Basket> RetrieveBasket(string buyerId)
     {
@@ -98,4 +130,30 @@ public class AccountController : BaseApiController
             .ThenInclude(p => p.Product)
             .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
     }
+
+    private async Task SendConfirmationEmail(string toEmail, string toName, int userId)
+    {
+        var token = Guid.NewGuid();
+        var emailToken = new EmailConfirmationToken
+        {
+            Token = token,
+            ExpDate = DateTime.UtcNow.AddDays(1),
+            UserId = userId
+        };
+        _context.EmailToken.Add(emailToken);
+        await _context.SaveChangesAsync();
+        var baseUrl = $"{Request.Scheme}://{Request.Host.Value}/";
+
+        if (_hostingEnv.EnvironmentName == "Development")
+        {
+            baseUrl = _config["BaseUrl"];
+        }
+
+        var body = $"Use this link to verify your account on Re-Store {baseUrl}tokenVerifier/{token}\n" +
+                    "This link is valid for 1 day\n" +
+                    "If you didn't sign up to Re-Store you can safely ignore this email";
+        await _mailService.SendEmailAsync(toName, toEmail, "Email Confirmation", body);
+    }
+
 }
+

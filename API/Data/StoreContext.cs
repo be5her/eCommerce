@@ -15,6 +15,7 @@ public class StoreContext : IdentityDbContext<User, Role, int>
 
     public DbSet<Order> Orders { get; set; }
 
+    public DbSet<EmailConfirmationToken> EmailToken { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

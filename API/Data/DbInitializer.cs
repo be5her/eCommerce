@@ -8,7 +8,8 @@ public static class DbInitializer
             var user = new User
             {
                 UserName = "bob",
-                Email = "bob@test.com"
+                Email = "bob@test.com",
+                EmailConfirmed = true
             };
             await userManager.CreateAsync(user, "P@ssTe5t");
             await userManager.AddToRoleAsync(user, "Member");
@@ -16,7 +17,8 @@ public static class DbInitializer
             var admin = new User
             {
                 UserName = "admin",
-                Email = "admin@test.com"
+                Email = "admin@test.com",
+                EmailConfirmed = true
             };
             await userManager.CreateAsync(admin, "P@ssTe5t");
             await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });

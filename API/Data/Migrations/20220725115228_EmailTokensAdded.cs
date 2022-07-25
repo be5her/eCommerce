@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+#nullable disable
+
 namespace API.Data.Migrations
 {
-    public partial class PastGresInitial : Migration
+    public partial class EmailTokensAdded : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -64,6 +66,19 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EmailToken",
+                columns: table => new
+                {
+                    Token = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailToken", x => x.Token);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -77,7 +92,7 @@ namespace API.Data.Migrations
                     ShippingAddress_State = table.Column<string>(type: "text", nullable: true),
                     ShippingAddress_Zip = table.Column<string>(type: "text", nullable: true),
                     ShippingAddress_Country = table.Column<string>(type: "text", nullable: true),
-                    OrderDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Subtotal = table.Column<long>(type: "bigint", nullable: false),
                     DeliveryFee = table.Column<long>(type: "bigint", nullable: false),
                     OrderStatus = table.Column<int>(type: "integer", nullable: false),
@@ -100,7 +115,8 @@ namespace API.Data.Migrations
                     PictureUrl = table.Column<string>(type: "text", nullable: true),
                     Brand = table.Column<string>(type: "text", nullable: true),
                     Type = table.Column<string>(type: "text", nullable: true),
-                    QuantityInStock = table.Column<int>(type: "integer", nullable: false)
+                    QuantityInStock = table.Column<int>(type: "integer", nullable: false),
+                    PublicId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -257,8 +273,7 @@ namespace API.Data.Migrations
                         name: "FK_OrderItem_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -293,8 +308,8 @@ namespace API.Data.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { 1, "a7985829-3547-4198-924f-c949a9289f8e", "Member", "MEMBER" },
-                    { 2, "35211f1d-f95b-4f0b-b8bf-b135a86a92d7", "Admin", "ADMIN" }
+                    { 1, "45f6ca86-beb5-4bbb-885c-d9baf3e00551", "Member", "MEMBER" },
+                    { 2, "bd4f8793-fe15-4a88-a1f2-43238a3e3b20", "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -369,6 +384,9 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "BasketItems");
+
+            migrationBuilder.DropTable(
+                name: "EmailToken");
 
             migrationBuilder.DropTable(
                 name: "OrderItem");
