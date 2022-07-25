@@ -29,6 +29,7 @@ import Orders from "../../features/orders/Orders";
 import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
 import Inventory from "../../features/admin/Inventory";
 import DemoWarning from "../components/DemoWarning";
+import EmailVerify from "../components/EmailVerify";
 
 function App() {
     // const { setBasket } = useStoreContext();
@@ -104,6 +105,10 @@ function App() {
                     <Route path="/basket" element={<BasketPage />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/login" element={<Login />} />
+                    <Route
+                        path="/tokenVerifier/:token"
+                        element={<EmailVerify />}
+                    />
                     <Route
                         path="/checkout"
                         element={

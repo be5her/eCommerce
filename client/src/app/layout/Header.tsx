@@ -70,7 +70,7 @@ export default function Header({
                         to="/"
                         sx={navStyles}
                     >
-                        E-COMM
+                        Re-Store
                     </Typography>
                     <FormGroup>
                         <FormControlLabel

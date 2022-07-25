@@ -68,7 +68,7 @@ export default function Register() {
                     agent.Account.register(data)
                         .then(() => {
                             toast.success(
-                                "Registration successful - you can now login"
+                                "Registration successful - You need to verify your email before you can log in"
                             );
                             history.push("/login");
                         })

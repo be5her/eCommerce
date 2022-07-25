@@ -1,35 +1,33 @@
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace API.Data
+namespace API.Data;
+public static class DbInitializer
 {
-    public static class DbInitializer
+    public static async Task Initialize(StoreContext context, UserManager<User> userManager)
     {
-        public static async Task Initialize(StoreContext context, UserManager<User> userManager)
+        if (!userManager.Users.Any())
         {
-            if (!userManager.Users.Any())
+            var user = new User
             {
-                var user = new User
-                {
-                    UserName = "bob",
-                    Email = "bob@test.com"
-                };
-                await userManager.CreateAsync(user, "P@ssTe5t");
-                await userManager.AddToRoleAsync(user, "Member");
+                UserName = "bob",
+                Email = "bob@test.com",
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(user, "P@ssTe5t");
+            await userManager.AddToRoleAsync(user, "Member");
 
-                var admin = new User
-                {
-                    UserName = "admin",
-                    Email = "admin@test.com"
-                };
-                await userManager.CreateAsync(admin, "P@ssTe5t");
-                await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });
+            var admin = new User
+            {
+                UserName = "admin",
+                Email = "admin@test.com",
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(admin, "P@ssTe5t");
+            await userManager.AddToRolesAsync(admin, new[] { "Member", "Admin" });
 
 
-            }
-            if (context.Products.Any()) return;
+        }
+        if (context.Products.Any()) return;
 
-            var products = new List<Product>
+        var products = new List<Product>
             {
                         new Product
                 {
@@ -228,13 +226,12 @@ namespace API.Data
                     QuantityInStock = 100
                 },
             };
-            foreach (var product in products)
-            {
-                context.Products.Add(product);
-            }
-            context.SaveChanges();
+        foreach (var product in products)
+        {
+            context.Products.Add(product);
         }
-
-
+        context.SaveChanges();
     }
+
+
 }

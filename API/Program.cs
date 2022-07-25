@@ -94,6 +94,8 @@ services.AddScoped<TokenService>();
 services.AddScoped<PaymentService>();
 services.AddScoped<ImageService>();
 
+services.AddSingleton<IEmailService, EmailService>();
+
 // Configure the HTTP request pipeline.
 var app = builder.Build();
 var env = builder.Environment;
