@@ -33,6 +33,21 @@ export const signInUser = createAsyncThunk<User, FieldValues>(
     }
 );
 
+export const verifyUser = createAsyncThunk<User, string>(
+    "account/verifyUser",
+    async (data, thunkAPI) => {
+        try {
+            const userDto = await agent.Account.verifyEmail(data);
+            const { basket, ...user } = userDto;
+            if (basket) thunkAPI.dispatch(setBasket(basket));
+            localStorage.setItem("user", JSON.stringify(user));
+            return user;
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue({ error: error.data });
+        }
+    }
+);
+
 export const fetchCurrentUser = createAsyncThunk<User>(
     "account/fetchCurrentUser",
     async (_, thunkAPI) => {
@@ -87,7 +102,11 @@ export const accountSlice = createSlice({
             history.push("/");
         });
         builder.addMatcher(
-            isAnyOf(signInUser.fulfilled, fetchCurrentUser.fulfilled),
+            isAnyOf(
+                signInUser.fulfilled,
+                fetchCurrentUser.fulfilled,
+                verifyUser.fulfilled
+            ),
             (state, action) => {
                 let claims = JSON.parse(
                     atob(action.payload.token.split(".")[1])

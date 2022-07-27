@@ -103,7 +103,7 @@ public class AccountController : BaseApiController
     }
 
     [HttpGet("tokenVerifier/{token}")]
-    public async Task<IActionResult> TokenVerifier(string token)
+    public async Task<ActionResult<UserDto>> TokenVerifier(string token)
     {
         var emailToken = await _context.EmailToken.FindAsync(Guid.Parse(token));
         if (emailToken == null || emailToken.ExpDate < DateTime.UtcNow)
@@ -115,7 +115,22 @@ public class AccountController : BaseApiController
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == emailToken.UserId);
         user.EmailConfirmed = true;
         await _context.SaveChangesAsync();
-        return Ok("Email Confirmed");
+
+        var userBasket = await RetrieveBasket(user.UserName);
+        var anonBasket = await RetrieveBasket(Request.Cookies["buyerId"]);
+        if (anonBasket != null)
+        {
+            if (userBasket != null) _context.Baskets.Remove(userBasket);
+            anonBasket.BuyerId = user.UserName;
+            Response.Cookies.Delete("buyerId");
+            await _context.SaveChangesAsync();
+        }
+        return new UserDto
+        {
+            Email = user.Email,
+            Token = await _tokenService.GenerateToken(user),
+            Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket?.MapBasketToDto()
+        };
     }
 
     private async Task<Basket> RetrieveBasket(string buyerId)
@@ -149,10 +164,10 @@ public class AccountController : BaseApiController
             baseUrl = _config["BaseUrl"];
         }
 
-        var body = $"Use this link to verify your account on Re-Store {baseUrl}tokenVerifier/{token}\n" +
-                    "This link is valid for 1 day\n" +
-                    "If you didn't sign up to Re-Store you can safely ignore this email";
-        await _mailService.SendEmailAsync(toName, toEmail, "Email Confirmation", body);
+        var body = $"<h3>Use <a href='{baseUrl}tokenVerifier/{token}'>This link</a> to verify your account on Re-Store " +
+                    "<br>This link is valid for 1 day <br>" +
+                    "If you didn't sign up to Re-Store you can safely ignore this email</h3>";
+        await _mailService.SendEmailAsync(toName, toEmail, "Email Confirmation", body, MimeKit.Text.TextFormat.Html);
     }
 
 }
